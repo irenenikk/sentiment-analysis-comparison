@@ -1,5 +1,7 @@
 # TODOs
 
+Instructions from here: https://www.cl.cam.ac.uk/teaching/1920/L90/Instructions201920.pdf
+
 Use data-tagged (tokenized)
 
 Types of classifiers:
