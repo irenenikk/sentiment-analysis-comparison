@@ -3,17 +3,20 @@ import pandas as pd
 import numpy as np
 import re
 
-def preprocess_ngrams(ngrams, sent, min_count, smooth):
+def get_ngram_probabilities(ngrams, sent, smooth):
     """ 
-        Count the frequency of each unigram in a given sentiment, and remove the least frequent words. 
+        Count the frequency of each unigram in a given sentiment. 
         Returns the conditional probability of each ngram given a sentiment, possibly applying smoothing.
     """
     counts = ngrams[ngrams['sentiment'] == sent]['ngram'].value_counts()
-    filtered = counts[counts >= min_count]
-    voc_size = len(counts)
     if smooth:
-        return (filtered+1)/(sum(filtered)+ngrams['ngram'].nunique())
-    return filtered/sum(filtered)    
+        return (counts+1)/(sum(counts)+len(counts))
+    return counts/sum(counts)
+
+def filter_least_frequent(data, min_freq):
+    counts = data['ngram'].value_counts()
+    filtered = counts[counts >= min_freq]
+    return data[data['ngram'].isin(filtered.index)]
 
 def get_bigram_list(tokens):
     """ Find bigrams from given text and return in a pandas dataframe. """

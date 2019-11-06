@@ -1,0 +1,30 @@
+Got 1519455 unigrams and 1517446 bigrams
+After filtering, 1467998 unigrams and 854609 bigrams
+-------------------
+Naive bayes baseline (no smoothing) using the files up to 899 in training and the rest as a test set.
+Naive Bayes classifier using unigrams
+0.6138613861386139
+----
+Naive Bayes classifier using bigrams
+0.6534653465346535
+----
+Naive Bayes classifier using unigrams and bigrams
+0.6683168316831684
+----
+--------------------
+--------------------
+The p-value of the effect of smoothing using the sign test
+The p-value of smoothing being better using only unigrams 1.3134235851689065e-10
+---
+The p-value of smoothing being better using only bigrams 1.1134318859528975e-12
+---
+The p-value of smoothing being better using both uni and bigrams 3.437120585310142e-10
+Cross validation using round robin splits
+When not smoothing
+Accuracy mean 0.6299999999999999 and variance 0.0097 when using only unigrams
+Accuracy mean 0.6305 and variance 0.006672500000000012 when using only bigrams
+Accuracy mean 0.657 and variance 0.01651 when using both unigrams and bigrams
+When  smoothing
+Accuracy mean 0.8100000000000002 and variance 0.008449999999999985 when using only unigrams
+Accuracy mean 0.828 and variance 0.010509999999999995 when using only bigrams
+Accuracy mean 0.8405000000000001 and variance 0.0081225 when using both unigrams and bigrams
