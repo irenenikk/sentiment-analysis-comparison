@@ -62,18 +62,19 @@ def get_uni_and_bi_grams(data_folder):
     bigram_df = pd.DataFrame(list(zip(bigrams, bigram_sentiments, bigram_file_ids, bigram_file_nos)), columns=['ngram', 'sentiment', 'file_id', 'file_no'])
     return unigram_df, bigram_df
 
-def unigram_tokenize(content, lowercase=True):
+def unigram_tokenize(content, lowercase):
     """ Split into unigrams by punctuation and whitespace, then lowercase and remove trailing whitespace"""
     tokens = list(filter(None,((map(lambda x: x, map(str.strip, re.split('(\W)', content)))))))
     if lowercase:
         tokens = [token.lower() for token in tokens]
     return np.asarray(tokens)
 
-def bigram_tokenize(content, lowercase=True):
+def bigram_tokenize(content, lowercase):
     """ Split text into bigrams """
-    tokens = unigram_tokenize(content)
+    tokens = unigram_tokenize(content, lowercase)
     for i in range(1, len(tokens)):
-        bigram = f'{tokens[i-1]} {tokens[i]}'
-        if lowercase:
-            yield bigram.lower()
-        yield bigram
+        yield f'{tokens[i-1]} {tokens[i]}'
+
+def get_fraction_of_sentiment(data, cl):
+    sentiment_files = data[['file_id', 'sentiment']].groupby('file_id').agg(lambda x: x.value_counts().index[0])
+    return (sentiment_files['sentiment'] == cl).sum()/len(sentiment_files)

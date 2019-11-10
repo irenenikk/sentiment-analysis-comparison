@@ -1,18 +1,24 @@
 from ngram_utils import get_ngram_probabilities
 import numpy as np
-from ngram_utils import get_bigram_list, get_uni_and_bi_grams, unigram_tokenize, bigram_tokenize
+from ngram_utils import get_bigram_list, get_uni_and_bi_grams, unigram_tokenize, bigram_tokenize, get_fraction_of_sentiment
 
 class NaiveB:
         
-    def __init__(self, classes, training_data_files, smooth, unigrams=None, bigrams=None):
+    def __init__(self, classes, training_data_files, smooth, unigrams=None, bigrams=None, lowercase=True):
         if unigrams is None and bigrams is None:
             raise ValueError('Please give unigrams, bigrams or both')
         self.unigrams = unigrams
         self.bigrams = bigrams
+        if lowercase:
+            if unigrams is not None:
+                self.unigrams['ngram'] = unigrams['ngram'].apply(lambda x: x.lower())
+            if bigrams is not None:
+                self.bigrams['ngram'] = bigrams['ngram'].apply(lambda x: x.lower())
         self.classes = classes
         self.smooth = smooth
         self.uni_class_conditioned_counts = {}
         self.bi_class_conditioned_counts = {}
+        self.lowercase = lowercase
         # prepare conditional probabilities here to make prediction faster
         self.class_priors = {}
         for cl in self.classes:
@@ -27,22 +33,21 @@ class NaiveB:
                 self.bi_class_conditioned_counts[cl] = get_ngram_probabilities(training_bigrams, cl, smooth)
                 self.bi_smooth_denom = (training_bigrams['sentiment']==cl).sum()+training_bigrams['ngram'].nunique()
                 training_data = training_bigrams
-            sentiment_files = training_data[['file_id', 'sentiment']].groupby('file_id').agg(lambda x: x.value_counts().index[0])
-            prior = (sentiment_files['sentiment'] == cl).sum()/len(sentiment_files)
+            prior = get_fraction_of_sentiment(training_data, cl)
             self.class_priors[cl] = prior
 
 
     def __str__(self):
         using_unigrams = self.unigrams is not None
         using_bigrams = self.bigrams is not None
-        return f"Naive Bayes classifier using {'unigrams and bigrams' if (using_bigrams and using_unigrams) else 'unigrams' if using_unigrams else 'bigrams'}"
+        return f"A{'n un' if self.smooth == False else ' '}smoothed Naive Bayes classifier using {'unigrams and bigrams' if (using_bigrams and using_unigrams) else 'unigrams' if using_unigrams else 'bigrams'}"
         
     def get_class_probabilites(self, text, class_conditioned_counts, smooth_denom, tokenize):
         """ Return the probabilities for each class using the given data. """
         class_probs = np.zeros(len(self.classes))
         for i, cl in enumerate(self.classes):
             p = 0
-            for word in tokenize(text):
+            for word in tokenize(text, lowercase=self.lowercase):
                 if word in class_conditioned_counts[cl].index:
                     p += np.log(class_conditioned_counts[cl].loc[word])
                 # apply smoothing separately if word not present in class

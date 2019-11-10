@@ -12,13 +12,14 @@ Naive Bayes classifier using unigrams and bigrams
 0.6683168316831684
 ----
 --------------------
---------------------
 The p-value of the effect of smoothing using the sign test
-The p-value of smoothing being better using only unigrams 1.3134235851689065e-10
----
-The p-value of smoothing being better using only bigrams 1.1134318859528975e-12
----
-The p-value of smoothing being better using both uni and bigrams 3.437120585310142e-10
+The p-value of smoothing being better using only unigrams 0.0008978142386493711
+The p-value of smoothing being better using only bigrams 0.001189893319835958
+The p-value of smoothing being better using both uni and bigrams 0.001481972401022295
+The p-value of not lowercasing being better using unigrams 1.000000000000115
+The p-value of using bigrams being better than using unigrams 0.7789880814175008
+The p-value of using both unigrams and bigrams being better than using unigrams 0.8328908240447961
+---------------------
 Cross validation using round robin splits
 When not smoothing
 Accuracy mean 0.6299999999999999 and variance 0.0097 when using only unigrams
