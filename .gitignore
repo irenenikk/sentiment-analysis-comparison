@@ -5,3 +5,6 @@ aclImdb
 .vscode
 *.pyc
 code/__pycache__
+models
+dummy
+resources

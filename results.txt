@@ -1,31 +1,38 @@
-Got 1519455 unigrams and 1517446 bigrams
-After filtering, 1467998 unigrams and 854609 bigrams
+Got 55384 unigrams and 484086 bigrams
+Fraction of positive reviews 0.5 and negatives 0.5
+After filtering 19583 unigrams and 27977 bigrams
 -------------------
 Naive bayes baseline (no smoothing) using the files up to 899 in training and the rest as a test set.
-Naive Bayes classifier using unigrams
-0.6138613861386139
+An unsmoothed Naive Bayes classifier using unigrams
+0.515
 ----
-Naive Bayes classifier using bigrams
-0.6534653465346535
+An unsmoothed Naive Bayes classifier using bigrams
+0.56
 ----
-Naive Bayes classifier using unigrams and bigrams
-0.6683168316831684
+An unsmoothed Naive Bayes classifier using unigrams and bigrams
+0.515
 ----
---------------------
-The p-value of the effect of smoothing using the sign test
-The p-value of smoothing being better using only unigrams 0.0008978142386493711
-The p-value of smoothing being better using only bigrams 0.001189893319835958
-The p-value of smoothing being better using both uni and bigrams 0.001481972401022295
-The p-value of not lowercasing being better using unigrams 1.000000000000115
-The p-value of using bigrams being better than using unigrams 0.7789880814175008
-The p-value of using both unigrams and bigrams being better than using unigrams 0.8328908240447961
+-------------------
+The p-value of the effect of smoothing using the sign test with a single split
+The p-value of smoothing using only unigrams 2.6528755595266667e-05
+The p-value of smoothing using only bigrams 0.0022794385018056994
+The p-value of smoothing using both uni and bigrams 3.5471781741301444e-06
+The p-value of lowercasing using unigrams 1.000000000000121
+The p-value of using bigrams compared to using unigrams 0.15816534520095996
+The p-value of using both unigrams and bigrams being better than using unigrams 1.0563484790092623
 ---------------------
 Cross validation using round robin splits
+----------------
 When not smoothing
-Accuracy mean 0.6299999999999999 and variance 0.0097 when using only unigrams
-Accuracy mean 0.6305 and variance 0.006672500000000012 when using only bigrams
-Accuracy mean 0.657 and variance 0.01651 when using both unigrams and bigrams
+Accuracy mean 0.5525 and variance 0.004612499999999992 when using only unigrams
+Accuracy mean 0.6164999999999999 and variance 0.009102500000000015 when using only bigrams
+Accuracy mean 0.532 and variance 0.01326 when using both unigrams and bigrams
+----------------
 When  smoothing
-Accuracy mean 0.8100000000000002 and variance 0.008449999999999985 when using only unigrams
-Accuracy mean 0.828 and variance 0.010509999999999995 when using only bigrams
-Accuracy mean 0.8405000000000001 and variance 0.0081225 when using both unigrams and bigrams
+Accuracy mean 0.812 and variance 0.007059999999999988 when using only unigrams
+Accuracy mean 0.828 and variance 0.006559999999999995 when using only bigrams
+Accuracy mean 0.8355 and variance 0.007822499999999993 when using both unigrams and bigrams
+--------------------
+The p-value of the effect of smoothing by cross-validated accuracies 0.001953125
+The p-value of the effect of using bigrams by cross-validated accuracies 0.2265625000000002
+The p-value of the effect of lowercasing by cross-validated accuracies 1.246093750000001

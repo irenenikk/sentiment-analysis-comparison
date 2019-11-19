@@ -42,19 +42,30 @@ class NaiveB:
         using_bigrams = self.bigrams is not None
         return f"A{'n un' if self.smooth == False else ' '}smoothed Naive Bayes classifier using {'unigrams and bigrams' if (using_bigrams and using_unigrams) else 'unigrams' if using_unigrams else 'bigrams'}"
         
+    def in_training_data(self, feature, class_conditioned_counts):
+        for counts in class_conditioned_counts.values():
+            if feature in counts.index:
+                return True
+        return False 
+
     def get_class_probabilites(self, text, class_conditioned_counts, smooth_denom, tokenize):
         """ Return the probabilities for each class using the given data. """
         class_probs = np.zeros(len(self.classes))
         for i, cl in enumerate(self.classes):
             p = 0
-            for word in tokenize(text, lowercase=self.lowercase):
-                if word in class_conditioned_counts[cl].index:
-                    p += np.log(class_conditioned_counts[cl].loc[word])
-                # apply smoothing separately if word not present in class
+            for feature in tokenize(text, lowercase=self.lowercase):
+                # ignore features which are unseen in the training data, according to
+                # http://web.stanford.edu/~jurafsky/slp3/4.pdf
+                if not self.in_training_data(feature, class_conditioned_counts):
+                    continue
+                if feature in class_conditioned_counts[cl].index:
+                    p += np.log(class_conditioned_counts[cl].loc[feature])
+                # apply smoothing separately if feature not present in class
                 elif self.smooth:
                     p += np.log(1/(smooth_denom))
-            # the prior is the fraction of documents in a specific class
-            # the mean is just to have one value for each file_id. The sentiment is the same for all reviews in one file.
+                else:
+                # this is to account for log(0), when a feature is not present in one class
+                    p += -np.inf
             p += np.log(self.class_priors[cl])
             class_probs[i] = p
         return class_probs    
@@ -66,4 +77,7 @@ class NaiveB:
             class_probs += self.get_class_probabilites(text, self.uni_class_conditioned_counts, self.uni_smooth_denom, unigram_tokenize)
         if self.bigrams is not None:
             class_probs += self.get_class_probabilites(text, self.bi_class_conditioned_counts, self.bi_smooth_denom, bigram_tokenize)
+        if (class_probs == class_probs[0]).all():
+            # if all probabilities are the same, choose randomly
+            return self.classes[np.random.randint(len(self.classes))]
         return self.classes[np.argmax(class_probs)]    
