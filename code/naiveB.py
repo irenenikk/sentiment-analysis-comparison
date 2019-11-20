@@ -1,6 +1,7 @@
 from ngram_utils import get_ngram_probabilities
 import numpy as np
 from ngram_utils import get_bigram_list, get_uni_and_bi_grams, unigram_tokenize, bigram_tokenize, get_fraction_of_sentiment
+import sys
 
 class NaiveB:
         
@@ -40,7 +41,8 @@ class NaiveB:
     def __str__(self):
         using_unigrams = self.unigrams is not None
         using_bigrams = self.bigrams is not None
-        return f"A{'n un' if self.smooth == False else ' '}smoothed Naive Bayes classifier using {'unigrams and bigrams' if (using_bigrams and using_unigrams) else 'unigrams' if using_unigrams else 'bigrams'}"
+        smoothed = ('n un' if self.smooth == False else ' ')
+        return "A{}smoothed Naive Bayes classifier using {}".format(smoothed, 'unigrams and bigrams' if (using_bigrams and using_unigrams) else 'unigrams' if using_unigrams else 'bigrams')
         
     def in_training_data(self, feature, class_conditioned_counts):
         for counts in class_conditioned_counts.values():
@@ -64,8 +66,9 @@ class NaiveB:
                 elif self.smooth:
                     p += np.log(1/(smooth_denom))
                 else:
-                # this is to account for log(0), when a feature is not present in one class
-                    p += -np.inf
+                # this is to approximate log(0) when a feature is not present in one class
+                    p = -float("inf")
+                    continue
             p += np.log(self.class_priors[cl])
             class_probs[i] = p
         return class_probs    
