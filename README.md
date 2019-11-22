@@ -1,50 +1,29 @@
 # Movie review sentiment classification
 
+This is the code used for the practical in the moduel Overview of NLP in Michaelmas 2019. You can find the different tasks in their respective files, named `practical1.py` and `practical2.py`.
+
+Note that this project uses python 3.
+
 ## Naive Bayes
 
-Instructions [here](https://www.cl.cam.ac.uk/teaching/1920/L90/Instructions201920.pdf)
+The relevant code can be found in [the file practical1.py](code/practical1.py).
 
-Use data-tagged (already tokenized)
+Original instructions are [here](https://www.cl.cam.ac.uk/teaching/1920/L90/Instructions201920.pdf).
 
-Types of classifiers:
-1. Unigram
-    - No need to do negation tagging
-    - Has to appear at least 4 times in the corpus
-2. Bigram
-    - Has to appear at least 7 times
-3. Joint bigram and unigram
-    - Use both at the same time
-    --> Multiply twice as many probabilities together
+The system includes both a vanilla classifier and one implemented with add-one smoothing. The classifier supports using either unigrams, bigrams, or both as the feature set. The main method will run a series of experiments and print out the results.
 
--  Train with files cv000–cv899
--  Test with cv900–cv999
--  Use three equal-sized folds while maintaining balanced class distributions in each fold. Report average three-fold cross-validation results
-- No need to use stems or stopwords
-- Treat punctuation as its own word
+The data used is not included in the repository. You should give the path to the dataset as an argument when running the program:
 
-## Doc2Vec + SVM
+```
+$ python3 code/practical1.py <path to data folder>
+```
+
+## SVM
+
+The relevant code can be found in [the file practical2.py](code/practical2.py).
 
 Instructions [here](https://www.cl.cam.ac.uk/teaching/1920/L90/Instructions201920_part2.pdf).
 
-State of the art [here](http://nlpprogress.com/english/sentiment_analysis.html)(~ 95 %).
+State of the art [here](http://nlpprogress.com/english/sentiment_analysis.html) (~ 95 %).
 
-### Different tasks
-- POS vs NEG
-- Three bins
-
-### System comparisons using the sign test
-- Distributed memory vs. distributed bag of words
-- SVM vs. Naive Bayes
-- Low dim representation vs. raw doc2vec vectors
-- Different SVM kernels
-
-### Hyperparameters
-- Vector size
-- Epoch amount
-
-### Validation methods for vectors
-- Compare mean vector distances for documents in same class
-    - Model has the method `distances`
-- Plot using t-SNE
-
-### Use cross-validation for system choice
+An expansion to the baseline system where an SVM is used in prediction. Compares systems using BOW-vectors and Doc2Vec

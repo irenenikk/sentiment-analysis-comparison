@@ -8,6 +8,7 @@ import numpy as np
 from collections import defaultdict
 from ngram_utils import get_bigram_list, get_uni_and_bi_grams, filter_least_frequent, get_fraction_of_sentiment
 from naiveB import NaiveB
+import sys
 
 from science_utils import sign_test_systems, sign_test_lists, sample_variance
 
@@ -62,6 +63,11 @@ def cross_validate_naive_b_unigrams_bigrams_sign_test(data, classes, folds, unig
     """ Test difference in two cross-validation accuracy sequences, one obtained using unigrams and the other using bigrams. """
     systemA_accuracies = cross_validate_naiveB(data, classes, folds, smooth=False, lowercase=False, unigrams=unigrams, return_raw=True)
     systemB_accuracies = cross_validate_naiveB(data, classes, folds, smooth=False, lowercase=False, unigrams=unigrams, bigrams=bigrams, return_raw=True)
+
+def cross_validate_naive_b_bigrams_sign_test_smoothed(data, classes, folds, unigrams, bigrams):
+    """ Test difference in two cross-validation accuracy sequences, one obtained using unigrams and the other using bigrams. """
+    systemA_accuracies = cross_validate_naiveB(data, classes, folds, smooth=True, lowercase=False, unigrams=unigrams, return_raw=True)
+    systemB_accuracies = cross_validate_naiveB(data, classes, folds, smooth=True, lowercase=False, bigrams=bigrams, return_raw=True)
     return sign_test_lists(systemA_accuracies, systemB_accuracies)
 
 def cross_validate_naive_b_lowercase_sign_test(data, classes, folds, unigrams):
@@ -105,7 +111,7 @@ def run_cross_validation(classes, unigrams, bigrams):
     print('Cross validation using round robin splits')
     for smooth in [False, True]:
         print('----------------')
-        print(f"When {'not' if smooth == False else ''} smoothing")
+        print("When {} smoothing".format('not' if smooth == False else ''))
         acc_mean1, acc_var1 = cross_validate_naiveB(unigrams, classes, 10, smooth=smooth, lowercase=False, unigrams=unigrams)
         print('Accuracy mean', acc_mean1, 'and variance', acc_var1, 'when using only unigrams')
         acc_mean2, acc_var2 = cross_validate_naiveB(unigrams, classes, 10, smooth=smooth, lowercase=False, bigrams=bigrams)
@@ -121,8 +127,10 @@ def run_cross_validated_accuracy_sign_tests(classes, unigrams, bigrams, folds=10
     print('The p-value of the effect of using bigrams by cross-validated accuracies', p2)
     p3 = cross_validate_naive_b_lowercase_sign_test(unigrams, classes, folds, unigrams)
     print('The p-value of the effect of lowercasing by cross-validated accuracies', p3)
-    p4 = cross_validate_naive_b_bigrams_sign_test(unigrams, classes, folds, unigrams, bigrams)
-    print('The p-value of the effect of using both unigrams and bigrams by cross-validated accuracies', p4)
+    p5 = cross_validate_naive_b_bigrams_sign_test(unigrams, classes, folds, unigrams, bigrams)
+    print('The p-value of the effect of using both unigrams and bigrams by cross-validated accuracies', p5)
+    p4 = cross_validate_naive_b_bigrams_sign_test_smoothed(unigrams, classes, folds, unigrams, bigrams)
+    print('The p-value of the effect of using bigrams when smoothing by cross-validated accuracies', p4)
 
 def get_features(data_folder):
     """ Load and filter unigrams and bigrams. """
@@ -139,7 +147,8 @@ def get_features(data_folder):
     return unigrams, bigrams
 
 def main():
-    data_folder = 'data-tagged'
+    np.random.seed(120)
+    data_folder = sys.argv[1] if len(sys.argv) > 1 else 'data-tagged'
 
     unigrams, bigrams = get_features(data_folder)
     max_training_id = 899

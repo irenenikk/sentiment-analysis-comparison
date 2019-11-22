@@ -22,7 +22,7 @@ def get_bigram_list(tokens):
     """ Find bigrams from given text and return in a pandas dataframe. """
     bigrams = []
     for i in range(1, len(tokens)):
-        bigram = f'{tokens[i-1]} {tokens[i]}'
+        bigram = "{} {}".format(tokens[i-1], tokens[i])
         bigrams += [bigram]
     return bigrams
 
@@ -41,10 +41,10 @@ def get_uni_and_bi_grams(data_folder):
     bigram_file_ids = []
     bigram_file_nos = []    
     for sent in sentiments:
-        review_folder = f'{data_folder}/{sent}'
+        review_folder = "{}/{}".format(data_folder, sent)
         for file in os.listdir(review_folder):
             sentiment = (1 if sent == 'POS' else -1)
-            file_id = f'{sent}-{file[2:5]}'
+            file_id = "{}-{}".format(sent, file[2:5])
             file_no = int(file[2:5])
             # find unigrams
             new_unigrams = pd.read_csv(os.path.join(review_folder, file), sep='\t', header=None, names=['ngram', 'pos']).values[:,0]
@@ -73,7 +73,7 @@ def bigram_tokenize(content, lowercase):
     """ Split text into bigrams """
     tokens = unigram_tokenize(content, lowercase)
     for i in range(1, len(tokens)):
-        yield f'{tokens[i-1]} {tokens[i]}'
+        yield "{} {}".format(tokens[i-1], tokens[i])
 
 def get_fraction_of_sentiment(data, cl):
     sentiment_files = data[['file_id', 'sentiment']].groupby('file_id').agg(lambda x: x.value_counts().index[0])
