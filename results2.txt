@@ -1,0 +1,127 @@
+Created a BOW vector of shape (1400, 10760)
+Training with 979 documents
+Accuracy using bow and svm with a single train-test split and a linear kernel 0.8171021377672208
+Accuracy using bow and svm with a single train-test split and a gaussian kernel 0.7814726840855107
+Getting reviews from aclImdb
+Found 50000 reviews
+-----------------------------------------
+window size 4 epochs 20 dm 0
+Training a Doc2Vec model for reviews
+For test set vectors inferred with doc2vec
+Average distance to all other vectors 0.33956063837992795
+Average distance between reviews of same label 0.3305073234068712
+a single train-test accuracy using doc2vec and svm with a linear kernel 0.8183333333333334
+a single train-test accuracy using doc2vec and svm with a poly (4) kernel 0.835
+a single train-test accuracy using doc2vec and svm with a gaussian kernel 0.8533333333333334
+-----------------------------------------
+-----------------------------------------
+window size 4 epochs 20 dm 1
+Training a Doc2Vec model for reviews
+For test set vectors inferred with doc2vec
+Average distance to all other vectors 0.4291256798348157
+Average distance between reviews of same label 0.418008161789618
+a single train-test accuracy using doc2vec and svm with a linear kernel 0.8
+a single train-test accuracy using doc2vec and svm with a poly (4) kernel 0.6366666666666667
+a single train-test accuracy using doc2vec and svm with a gaussian kernel 0.725
+-----------------------------------------
+-----------------------------------------
+window size 4 epochs 25 dm 0
+Training a Doc2Vec model for reviews
+For test set vectors inferred with doc2vec
+Average distance to all other vectors 0.3478612378960158
+Average distance between reviews of same label 0.3384242904714037
+a single train-test accuracy using doc2vec and svm with a linear kernel 0.8333333333333334
+a single train-test accuracy using doc2vec and svm with a poly (4) kernel 0.835
+a single train-test accuracy using doc2vec and svm with a gaussian kernel 0.87
+-----------------------------------------
+-----------------------------------------
+window size 4 epochs 25 dm 1
+Training a Doc2Vec model for reviews
+For test set vectors inferred with doc2vec
+Average distance to all other vectors 0.42602586602241316
+Average distance between reviews of same label 0.41500199570981106
+a single train-test accuracy using doc2vec and svm with a linear kernel 0.795
+a single train-test accuracy using doc2vec and svm with a poly (4) kernel 0.6583333333333333
+a single train-test accuracy using doc2vec and svm with a gaussian kernel 0.7233333333333334
+-----------------------------------------
+-----------------------------------------
+window size 6 epochs 20 dm 0
+Training a Doc2Vec model for reviews
+For test set vectors inferred with doc2vec
+Average distance to all other vectors 0.3397751011207014
+Average distance between reviews of same label 0.3305520486508957
+a single train-test accuracy using doc2vec and svm with a linear kernel 0.8233333333333334
+a single train-test accuracy using doc2vec and svm with a poly (4) kernel 0.8383333333333334
+a single train-test accuracy using doc2vec and svm with a gaussian kernel 0.8566666666666667
+-----------------------------------------
+-----------------------------------------
+window size 6 epochs 20 dm 1
+Training a Doc2Vec model for reviews
+For test set vectors inferred with doc2vec
+Average distance to all other vectors 0.4282131692258337
+Average distance between reviews of same label 0.4165748042339277
+a single train-test accuracy using doc2vec and svm with a linear kernel 0.795
+a single train-test accuracy using doc2vec and svm with a poly (4) kernel 0.6183333333333333
+a single train-test accuracy using doc2vec and svm with a gaussian kernel 0.69
+-----------------------------------------
+-----------------------------------------
+window size 6 epochs 25 dm 0
+Training a Doc2Vec model for reviews
+For test set vectors inferred with doc2vec
+Average distance to all other vectors 0.3469419605485846
+Average distance between reviews of same label 0.33767124617904015
+a single train-test accuracy using doc2vec and svm with a linear kernel 0.83
+a single train-test accuracy using doc2vec and svm with a poly (4) kernel 0.82
+a single train-test accuracy using doc2vec and svm with a gaussian kernel 0.865
+-----------------------------------------
+-----------------------------------------
+window size 6 epochs 25 dm 1
+Training a Doc2Vec model for reviews
+For test set vectors inferred with doc2vec
+Average distance to all other vectors 0.42792277831885467
+Average distance between reviews of same label 0.4166642984540685
+a single train-test accuracy using doc2vec and svm with a linear kernel 0.8116666666666666
+a single train-test accuracy using doc2vec and svm with a poly (4) kernel 0.65
+a single train-test accuracy using doc2vec and svm with a gaussian kernel 0.7533333333333333
+-----------------------------------------
+-----------------------------------------
+window size 8 epochs 20 dm 0
+Training a Doc2Vec model for reviews
+For test set vectors inferred with doc2vec
+Average distance to all other vectors 0.3392578294260725
+Average distance between reviews of same label 0.3300834625704791
+a single train-test accuracy using doc2vec and svm with a linear kernel 0.8266666666666667
+a single train-test accuracy using doc2vec and svm with a poly (4) kernel 0.84
+a single train-test accuracy using doc2vec and svm with a gaussian kernel 0.85
+-----------------------------------------
+-----------------------------------------
+window size 8 epochs 20 dm 1
+Training a Doc2Vec model for reviews
+For test set vectors inferred with doc2vec
+Average distance to all other vectors 0.4283469859262642
+Average distance between reviews of same label 0.4171414717157067
+a single train-test accuracy using doc2vec and svm with a linear kernel 0.7883333333333333
+a single train-test accuracy using doc2vec and svm with a poly (4) kernel 0.62
+a single train-test accuracy using doc2vec and svm with a gaussian kernel 0.73
+-----------------------------------------
+-----------------------------------------
+window size 8 epochs 25 dm 0
+Training a Doc2Vec model for reviews
+For test set vectors inferred with doc2vec
+Average distance to all other vectors 0.34738144745088073
+Average distance between reviews of same label 0.33793152871019744
+a single train-test accuracy using doc2vec and svm with a linear kernel 0.8233333333333334
+a single train-test accuracy using doc2vec and svm with a poly (4) kernel 0.8383333333333334
+a single train-test accuracy using doc2vec and svm with a gaussian kernel 0.855
+-----------------------------------------
+-----------------------------------------
+window size 8 epochs 25 dm 1
+Training a Doc2Vec model for reviews
+For test set vectors inferred with doc2vec
+Average distance to all other vectors 0.42570053947991104
+Average distance between reviews of same label 0.4147918520577636
+a single train-test accuracy using doc2vec and svm with a linear kernel 0.8083333333333333
+a single train-test accuracy using doc2vec and svm with a poly (4) kernel 0.6583333333333333
+a single train-test accuracy using doc2vec and svm with a gaussian kernel 0.75
+-----------------------------------------
+Max accuracy was 0.87 with params {'kernel': 'rbf', 'dm': 0, 'epochs': 25, 'window_size': 4}

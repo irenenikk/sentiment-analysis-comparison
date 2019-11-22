@@ -1,8 +1,6 @@
 import re
 import gensim
 from gensim.test.utils import common_texts
-from gensim.models.doc2vec import Doc2Vec, TaggedDocument
-from gensim.test.utils import get_tmpfile
 import os
 import pandas as pd
 from sklearn import svm
@@ -18,19 +16,6 @@ import plotly.graph_objects as go
 from scipy import spatial
 
 models_file = 'models'
-
-def build_doc2vec_model(reviews, vec_size, window_size, min_count, epochs, dm, pretrained=True, save=True):
-    fname = get_tmpfile(f'doc2vec_{vec_size}_{window_size}_{min_count}')
-    if pretrained and os.path.exists(fname):
-        print('Loaded trained Doc2Vec from', fname)
-        return Doc2Vec.load(fname)
-    print('Training a Doc2Vec model for reviews')
-    documents = [TaggedDocument(doc_tokenize(doc), [i]) for i, doc in enumerate(reviews)]
-    model = Doc2Vec(documents, vector_size=vec_size, window=2, min_count=min_count, workers=4, dm=dm, epochs=epochs)
-    if save:
-        print('Saving to', fname)
-        model.save(fname)
-    return model
 
 def build_svm_classifier(X, Y, pretrained=True, save=True, **kwargs):
     idd = '_'.join([f'{key}={str(value)}' for key, value in kwargs.items()])
@@ -99,20 +84,22 @@ def visualize_vectors(X, Y, window_size, epochs):
     fig.show()
 
 def evaluate_vector_qualities(X, Y, model):
-    pos_distances = []
-    neg_distances = []
+    # 0: same label, 1: other vectors
+    distances = np.zeros((len(X), 2))
     for i in range(len(X)):
+        distances_to_others = np.zeros((len(X), 2))
         for j in range(len(X)):
             if i == j:
                 continue
             distance = spatial.distance.cosine(X[i], X[j])
-            if Y[i] > 0:
-                pos_distances += [distance]
+            if Y[i] == Y[j]:
+                distances_to_others[j, 0] = distance
             else:
-                neg_distances += [distance]
-    print('Distance mean', np.mean(np.append(pos_distances, neg_distances)))
-    print('Average distance between positive reviews', np.mean(pos_distances), 'with variance', np.var(pos_distances))
-    print('Average distance between negative reviews', np.mean(neg_distances), 'with variance', np.var(neg_distances))
+                distances_to_others[j, 1] = distance
+        distances[i, 0] = np.mean(distances_to_others[:, 0])
+        distances[i, 1] = np.mean(distances_to_others[:, 1])
+    print('Average distance to all other vectors', np.mean(distances[:,1]))
+    print('Average distance between reviews of same label', np.mean(distances[:,0]))
 
 
 def main():
@@ -134,8 +121,8 @@ def main():
 
     maxim = -1
     max_params = {}
-    for window_size in [4, 8, 10]:
-        for epochs in [10, 20, 30]:
+    for window_size in [2, 4, 6, 8]:
+        for epochs in [15, 20, 25]:
             for dm in [0, 1]:
                 print('-----------------------------------------')
                 print('window size', window_size, 'epochs', epochs, 'dm', dm)
@@ -147,24 +134,25 @@ def main():
                 print('For test set vectors inferred with doc2vec')
                 evaluate_vector_qualities(test_X, test_Y, model_imdb)
                 svm1 = build_svm_classifier(train_X, train_Y, kernel='linear', pretrained=False)
-                accuracy1 = estimate_accuracy(test_X, test_Y, svm)
-                print('CV accuracy using doc2vec and svm with a linear kernel', accuracy1)
+                accuracy1 = estimate_accuracy(test_X, test_Y, svm1)
+                print('a single train-test accuracy using doc2vec and svm with a linear kernel', accuracy1)
                 svm2 = build_svm_classifier(train_X, train_Y, kernel='poly', gamma='scale', pretrained=False)
-                accuracy2 = estimate_accuracy(test_X, test_Y, svm)
-                print('CV accuracy using doc2vec and svm with a poly (4) kernel', accuracy2)
+                accuracy2 = estimate_accuracy(test_X, test_Y, svm2)
+                print('a single train-test accuracy using doc2vec and svm with a poly (4) kernel', accuracy2)
                 svm3 = build_svm_classifier(train_X, train_Y, kernel='rbf', gamma='scale', pretrained=False)
                 accuracy3 = estimate_accuracy(test_X, test_Y, svm3)
-                print('CV accuracy using doc2vec and svm with a gaussian kernel', accuracy3)
+                print('a single train-test accuracy using doc2vec and svm with a gaussian kernel', accuracy3)
                 if accuracy1 > maxim:
                     maxim = accuracy1
-                    max_params = { kernel: 'linear', dm: dm, epochs: epochs, window_size: window_size}
+                    max_params = { 'kernel': 'linear', 'dm': dm, 'epochs': epochs, 'window_size': window_size}
                 if accuracy2 > maxim:
                     maxim = accuracy2
-                    max_params = { kernel: 'poly', dm: dm, epochs: epochs, window_size: window_size}
+                    max_params = { 'kernel': 'poly', 'dm': dm, 'epochs': epochs, 'window_size': window_size}
                 if accuracy3 > maxim:
                     maxim = accuracy3
-                    max_params = { kernel: 'rbf', dm: dm, epochs: epochs, window_size: window_size}
+                    max_params = { 'kernel': 'rbf', 'dm': dm, 'epochs': epochs, 'window_size': window_size}
                 print('-----------------------------------------')
+    print('Max accuracy was', maxim, 'with params', max_params)
 
 if __name__ == '__main__':
     main()

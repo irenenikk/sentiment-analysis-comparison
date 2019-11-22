@@ -3,6 +3,8 @@ import os
 import pandas as pd
 import numpy as np
 from sklearn.feature_extraction.text import CountVectorizer
+from gensim.models.doc2vec import Doc2Vec, TaggedDocument
+from gensim.test.utils import get_tmpfile
 
 def doc_tokenize(doc):
     """ Split document into lowercased words removing any special characters. """
@@ -29,6 +31,19 @@ def get_reviews(imdb_data_folder, imdb_sentiments, subfolders):
     reviews = pd.DataFrame(list(zip(review_list, review_id_list, review_grade_list, review_sentiment_list)), columns=['review', 'id', 'grade', 'sentiment'])
     print('Found', len(reviews), 'reviews')
     return reviews
+
+def build_doc2vec_model(reviews, vec_size, window_size, min_count, epochs, dm, pretrained=True, save=True):
+    fname = get_tmpfile(f'doc2vec_{vec_size}_{window_size}_{min_count}')
+    if pretrained and os.path.exists(fname):
+        print('Loaded trained Doc2Vec from', fname)
+        return Doc2Vec.load(fname)
+    print('Training a Doc2Vec model for reviews')
+    documents = [TaggedDocument(doc_tokenize(doc), [i]) for i, doc in enumerate(reviews)]
+    model = Doc2Vec(documents, vector_size=vec_size, window=2, min_count=min_count, workers=4, dm=dm, epochs=epochs)
+    if save:
+        print('Saving to', fname)
+        model.save(fname)
+    return model
 
 def train_doc2vec_model(review_data, train_frac=0.7, vec_size=100, window_size=4, min_count=4, epochs=30, dm=1):
     """ Train a doc2vec model from given text data and return the trained model and training set vectors. """
