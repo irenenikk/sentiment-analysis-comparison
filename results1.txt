@@ -19,7 +19,7 @@ The p-value of smoothing using only bigrams 0.00028927526378706204
 The p-value of smoothing using both uni and bigrams 5.316851966364647e-06
 The p-value of lowercasing using unigrams 1.000000000000121
 The p-value of using bigrams compared to using unigrams 0.7237710263128192
-The p-value of using both unigrams and bigrams being better than using unigrams 0.3973782900879528
+The p-value of using both unigrams and bigrams being better than using bigrams 0.3973782900879528
 ---------------------
 Cross validation using round robin splits
 ----------------
@@ -35,6 +35,5 @@ Accuracy mean 0.8354999999999999 and variance 0.008122499999999993 when using bo
 --------------------
 The p-value of the effect of smoothing by cross-validated accuracies 0.001953125
 The p-value of the effect of using bigrams by cross-validated accuracies 0.02148437500000002
-The p-value of the effect of lowercasing by cross-validated accuracies 1.246093750000001
 The p-value of the effect of using bigrams when smoothing by cross-validated accuracies 0.109375
 

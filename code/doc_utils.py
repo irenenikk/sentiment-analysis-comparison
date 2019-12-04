@@ -33,7 +33,7 @@ def get_reviews(imdb_data_folder, imdb_sentiments, subfolders):
     return reviews
 
 def build_doc2vec_model(reviews, vec_size, window_size, min_count, epochs, dm, pretrained=True, save=True):
-    fname = get_tmpfile(f'doc2vec_{vec_size}_{window_size}_{min_count}')
+    fname = get_tmpfile('doc2vec_{}_{}_{}'.format(vec_size, window_size, min_count))
     if pretrained and os.path.exists(fname):
         print('Loaded trained Doc2Vec from', fname)
         return Doc2Vec.load(fname)

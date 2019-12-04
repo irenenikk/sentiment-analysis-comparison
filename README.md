@@ -2,7 +2,7 @@
 
 This is the code used for the practical in the moduel Overview of NLP in Michaelmas 2019. You can find the different tasks in their respective files, named `practical1.py` and `practical2.py`.
 
-Note that this project uses python 3.
+Note that this project uses python 3.5.
 
 ## Naive Bayes
 

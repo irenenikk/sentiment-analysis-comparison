@@ -5,6 +5,7 @@ Accuracy using bow and svm with a single train-test split and a gaussian kernel 
 Getting reviews from aclImdb
 Found 50000 reviews
 -----------------------------------------
+-------Doc2Vec Hyperparams-------
 window size 4 epochs 20 dm 0
 Training a Doc2Vec model for reviews
 For test set vectors inferred with doc2vec
@@ -125,3 +126,7 @@ a single train-test accuracy using doc2vec and svm with a poly (4) kernel 0.6583
 a single train-test accuracy using doc2vec and svm with a gaussian kernel 0.75
 -----------------------------------------
 Max accuracy was 0.87 with params {'kernel': 'rbf', 'dm': 0, 'epochs': 25, 'window_size': 4}
+
+--------BOW params---------
+Using a Gaussian kernel, Best accuracy 0.8026520733773429 with gamma = scale, and c = 4.7
+Best accuracy with a linear kernel 0.8077389784802873 and gamma = scale, and c = 8.3
