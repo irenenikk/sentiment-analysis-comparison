@@ -5,6 +5,7 @@ import numpy as np
 from sklearn.feature_extraction.text import CountVectorizer
 from gensim.models.doc2vec import Doc2Vec, TaggedDocument
 from gensim.test.utils import get_tmpfile
+from scipy import spatial
 
 def doc_tokenize(doc):
     """ Split document into lowercased words removing any special characters. """
@@ -13,6 +14,7 @@ def doc_tokenize(doc):
 def get_reviews(imdb_data_folder, imdb_sentiments, subfolders):
     """ Return a dataframe of loaded reviews with grade and sentiment. """
     print('Getting reviews from', imdb_data_folder)
+    # using lists is ugly but faster than appending to a dataframe
     review_list = []
     review_id_list = []
     review_grade_list = []
@@ -29,11 +31,12 @@ def get_reviews(imdb_data_folder, imdb_sentiments, subfolders):
                 review_list += [review]
                 review_sentiment_list += [1 if sent == 'pos' else -1]
     reviews = pd.DataFrame(list(zip(review_list, review_id_list, review_grade_list, review_sentiment_list)), columns=['review', 'id', 'grade', 'sentiment'])
-    print('Found', len(reviews), 'reviews')
+    print('Found', len(reviews), ' IMDB reviews')
     return reviews
 
 def build_doc2vec_model(reviews, vec_size, window_size, min_count, epochs, dm, pretrained=True, save=True):
     fname = get_tmpfile('doc2vec_{}_{}_{}'.format(vec_size, window_size, min_count))
+    # BUG: distinguishing between pretrained models
     if pretrained and os.path.exists(fname):
         print('Loaded trained Doc2Vec from', fname)
         return Doc2Vec.load(fname)
@@ -57,8 +60,37 @@ def get_doc2vec_data(reviews, model):
     """ Get Doc2Vec vectors from a trained model. """
     return np.asarray([model.infer_vector(review.lower().split()) for review in reviews])
 
-def get_bow_vectors(review_data, min_count, max_frac):
+def get_bow_vectors(review_data, min_count=5, max_frac=.5, vectorizer=None):
     """ Return BOW vectors for a given array of text. """
-    vectorizer = CountVectorizer(min_df=min_count, max_df=max_frac)
-    vectorizer.fit(review_data)
-    return vectorizer.transform(review_data).toarray()
+    if vectorizer is None:
+        vectorizer = CountVectorizer(min_df=min_count, max_df=max_frac)
+        vectorizer.fit(review_data)
+    return vectorizer.transform(review_data).toarray(), vectorizer
+
+def visualize_vectors(X, Y, window_size, epochs):
+    X_embedded = TSNE(n_components=2).fit_transform(X)
+    fig = go.Figure(data=go.Scatter(x=X_embedded[:,0],
+                                    y=X_embedded[:,1],
+                                    mode='markers',
+                                    marker_color=Y))
+    fig.update_layout(title='Doc2Vec t-SNE representation, window size {}, epochs {}'.format(window_size, epochs))
+    fig.show()
+
+def evaluate_vector_qualities(X, Y, model):
+    # 0: same label, 1: different label
+    distances = np.zeros((len(X), 2))
+    for i in range(len(X)):
+        distances_to_others = np.zeros((len(X), 2))
+        for j in range(len(X)):
+            if i == j:
+                continue
+            distance = spatial.distance.cosine(X[i], X[j])
+            if Y[i] == Y[j]:
+                distances_to_others[j, 0] = distance
+            else:
+                distances_to_others[j, 1] = distance
+        distances[i, 0] = np.mean(distances_to_others[:, 0])
+        distances[i, 1] = np.mean(distances_to_others[:, 1])
+    print('Average distance to all other vectors', np.mean(distances[:,1]))
+    print('Average distance between reviews of same label', np.mean(distances[:,0]))
+

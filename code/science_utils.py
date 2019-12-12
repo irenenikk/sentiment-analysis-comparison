@@ -52,8 +52,7 @@ def get_accuracy(preds, Y):
 def swap_randomly(A, B, shift_indx=None):
     assert len(A) == len(B), 'Both lists have to be the same size.'
     if shift_indx is None:
-        # sample random amount of indexes to swap
-        #shift_amount = np.random.randint(len(A))
+        # sample random amount of indexes to swap using a coin toss
         shift_amount = np.random.binomial(len(A), 0.5)
         indexes = list(range(len(A)))
         # flip the values in lists in random places
@@ -64,7 +63,8 @@ def swap_randomly(A, B, shift_indx=None):
     B[shift_indx] = tmp
     return A, B
 
-def permutation_test2(true_labels, results_A, results_B, R=5000):
+def permutation_test(true_labels, results_A, results_B, R=5000):
+    """ Monte carlo permutation test on two different predicstion lists. """
     acc_differences = np.zeros(R)
     true_acc_A = get_accuracy(results_A, true_labels)
     true_acc_B = get_accuracy(results_B, true_labels)
@@ -74,14 +74,6 @@ def permutation_test2(true_labels, results_A, results_B, R=5000):
         acc_A = (shuff_A == true_labels).sum()/len(shuff_A)
         acc_B = (shuff_B == true_labels).sum()/len(shuff_B)
         acc_differences[i] = np.abs(acc_A - acc_B)
-    return ((acc_differences >= true_diff).sum()+1)/(R+1)
-
-def permutation_test(results_A, results_B, R=5000):
-    acc_differences = np.zeros(R)
-    true_diff = np.abs(np.mean(results_A) - np.mean(results_B))
-    for i in range(R):
-        shuff_A, shuff_B = swap_randomly(results_A, results_B)
-        acc_differences[i] = np.abs(np.mean(shuff_A) - np.mean(shuff_B))
     return ((acc_differences >= true_diff).sum()+1)/(R+1)
 
 def sample_variance(data):
