@@ -59,20 +59,6 @@ def get_bow_data(review_data, train_frac=0.7, min_count=10, max_frac=0.5, dim=10
     Y = review_data['sentiment'].to_numpy()
     print('Created a BOW vector of shape', X.shape)
     return get_train_test_split(0.7, X, Y)
-
-def get_bow_data2(review_data, train_frac=0.7, min_count=10, max_frac=0.5, dim=100):
-    review_vector = review_data['review'].values
-    vectorizer = CountVectorizer(min_df=min_count, max_df=max_frac)
-    vectorizer.fit(review_vector)
-    print('BOW vocabulary size', len(vectorizer.vocabulary_))
-    sentiment_vector = review_data['sentiment'].to_numpy()
-    train_idx, test_idx = train_test_split_indexes(review_data, train_frac)
-    train_X = vectorizer.transform(review_vector[train_idx]).toarray()
-    train_Y = sentiment_vector[train_idx]
-    test_X = vectorizer.transform(review_vector[test_idx]).toarray()
-    test_Y = sentiment_vector[test_idx]
-    print('Created a training BOW vector of shape', train_X.shape)
-    return train_X, train_Y, test_X, test_Y
     
 def visualize_vectors(X, Y, window_size, epochs):
     X_embedded = TSNE(n_components=2).fit_transform(X)
