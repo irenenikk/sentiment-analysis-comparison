@@ -88,7 +88,7 @@ def run_permutation_test_bow_lowercase(train, test, kernel):
     test_Y = test['sentiment'].to_numpy()
     bow_train_X, vectorizer = get_bow_vectors(train['review'].values, min_count=5, max_frac=0.5)
     bow_test_X, _ = get_bow_vectors(test['review'].values, vectorizer=vectorizer)
-    low_bow_train_X, low_vectorizer = get_bow_vectors(train['review'].values, min_count=5, max_frac=0.5, lowercase=False)
+    low_bow_train_X, low_vectorizer = get_bow_vectors(train['review'].values, min_count=5, max_frac=0.5, lowercase=False, frequency=False)
     low_bow_test_X, _ = get_bow_vectors(test['review'].values, vectorizer=low_vectorizer)
     svm1 = build_svm_classifier(bow_train_X, train_Y, kernel=kernel, gamma='scale')
     svm2 = build_svm_classifier(low_bow_train_X, train_Y, kernel=kernel, gamma='scale')
@@ -224,7 +224,7 @@ def cross_validate_permutation_tests(training_data, imdb_reviews, doc2vec_train_
     mean_p2 = cross_validate_permutation_test(training_data,
                                     3, 
                                     run_permutation_test_bow_lowercase, 
-                                    kernel1='rbf')
+                                    kernel='rbf')
     print('mean p value with bow linear and rbf kernel', mean_p2)
     print('Comparing doc2vec to bow with different kernels')
     mean_p3 = cross_validate_permutation_test(training_data,
@@ -306,7 +306,7 @@ def main():
     training_data, val_data = get_train_test_split(0.7, development_data)
     print('Training data size', len(training_data), 'test data size', len(val_data))
     print('-----------')
-    get_cross_validated_baseline_accuracies(development_data, d2v_X_1=doc2vec_train_X, d2v_X_2=dm_doc2vec_train_X, d2v_Y=doc2vec_train_Y, d2v_model1=doc2vec_model, d2v_model2=dm_doc2vec_model)
+    #get_cross_validated_baseline_accuracies(development_data, d2v_X_1=doc2vec_train_X, d2v_X_2=dm_doc2vec_train_X, d2v_Y=doc2vec_train_Y, d2v_model1=doc2vec_model, d2v_model2=dm_doc2vec_model)
     print('-----------')
     #run_single_split_permutation_tests(training_data, val_data, doc2vec_train_X, doc2vec_train_Y, doc2vec_model)
     print('-----------')
