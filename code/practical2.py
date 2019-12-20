@@ -77,10 +77,10 @@ def cross_validate_permutation_test(data, folds, run_perm_test, **kwargs):
 def run_permutation_test_two_bow_kernels(train, test, kernel1, kernel2):
     train_Y = train['sentiment'].to_numpy()
     test_Y = test['sentiment'].to_numpy()
-    bow_train_X, vectorizer = get_bow_vectors(train['review'].values, min_count=5, max_frac=0.5)
+    bow_train_X, vectorizer = get_bow_vectors(train['review'].values, min_count=5, max_frac=0.5, frequency=False)
     bow_test_X, _ = get_bow_vectors(test['review'].values, vectorizer=vectorizer)
     svm1 = build_svm_classifier(bow_train_X, train_Y, kernel=kernel1, gamma='scale')
-    svm2 = build_svm_classifier(bow_train_X, train_Y, kernel=kernel1, gamma='scale')
+    svm2 = build_svm_classifier(bow_train_X, train_Y, kernel=kernel2, gamma='scale')
     return permutation_test(test_Y, svm2.predict(bow_test_X), svm2.predict(bow_test_X))
 
 def run_permutation_test_bow_lowercase(train, test, kernel):
