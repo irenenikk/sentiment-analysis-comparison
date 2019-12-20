@@ -1,7 +1,5 @@
 .ipynb_checkpoints
-data*
 .DS_Store
-aclImdb
 .vscode
 *.pyc
 code/__pycache__
