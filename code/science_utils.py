@@ -64,7 +64,7 @@ def swap_randomly(A, B, shift_indx=None):
     return A, B
 
 def permutation_test(true_labels, results_A, results_B, R=5000):
-    """ Monte carlo permutation test on two different predicstion lists. """
+    """ Monte carlo permutation test on two different prediction lists. """
     acc_differences = np.zeros(R)
     true_acc_A = get_accuracy(results_A, true_labels)
     true_acc_B = get_accuracy(results_B, true_labels)
