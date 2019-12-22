@@ -77,29 +77,51 @@ def cross_validate_permutation_test(data, folds, run_perm_test, **kwargs):
 def run_permutation_test_two_bow_kernels(train, test, kernel1, kernel2):
     train_Y = train['sentiment'].to_numpy()
     test_Y = test['sentiment'].to_numpy()
-    bow_train_X, vectorizer = get_bow_vectors(train['review'].values, min_count=5, max_frac=0.5, frequency=False)
+    bow_train_X, vectorizer = get_bow_vectors(train['review'].values, min_count=4, max_frac=0.5, frequency=False)
     bow_test_X, _ = get_bow_vectors(test['review'].values, vectorizer=vectorizer)
     svm1 = build_svm_classifier(bow_train_X, train_Y, kernel=kernel1, gamma='scale')
     svm2 = build_svm_classifier(bow_train_X, train_Y, kernel=kernel2, gamma='scale')
-    return permutation_test(test_Y, svm2.predict(bow_test_X), svm2.predict(bow_test_X))
+    return permutation_test(test_Y, svm1.predict(bow_test_X), svm2.predict(bow_test_X))
+
+def run_permutation_test_bow_with_bigrams(train, test, kernel):
+    train_Y = train['sentiment'].to_numpy()
+    test_Y = test['sentiment'].to_numpy()
+    bi_train_X, bi_vectorizer = get_bow_vectors(train['review'].values, min_count=7, max_frac=0.5, frequency=False, bigrams=True)
+    bi_test_X, _ = get_bow_vectors(test['review'].values, vectorizer=bi_vectorizer)
+    uni_train_X, uni_vectorizer = get_bow_vectors(train['review'].values, min_count=4, max_frac=0.5, frequency=False)
+    uni_test_X, _ = get_bow_vectors(test['review'].values, vectorizer=uni_vectorizer)
+    svm1 = build_svm_classifier(bi_train_X, train_Y, kernel=kernel, gamma='scale')
+    svm2 = build_svm_classifier(uni_train_X, train_Y, kernel=kernel, gamma='scale')
+    return permutation_test(test_Y, svm1.predict(bi_test_X), svm2.predict(uni_test_X))
+
+def run_permutation_test_bow_with_uni_and_bigrams(train, test, kernel):
+    train_Y = train['sentiment'].to_numpy()
+    test_Y = test['sentiment'].to_numpy()
+    bi_train_X, bi_vectorizer = get_bow_vectors(train['review'].values, min_count=7, max_frac=0.5, frequency=False, bigrams=True)
+    bi_test_X, _ = get_bow_vectors(test['review'].values, vectorizer=bi_vectorizer)
+    uni_train_X, uni_vectorizer = get_bow_vectors(train['review'].values, min_count=4, max_frac=0.5, frequency=False, bigrams=True)
+    uni_test_X, _ = get_bow_vectors(test['review'].values, vectorizer=uni_vectorizer)
+    svm1 = build_svm_classifier(uni_train_X, train_Y, kernel=kernel, gamma='scale')
+    svm2 = build_svm_classifier(np.concatenate((uni_train_X, bi_train_X), axis=1), train_Y, kernel=kernel, gamma='scale')
+    return permutation_test(test_Y, svm1.predict(uni_test_X), svm2.predict(np.concatenate((uni_test_X, bi_test_X), axis=1)))
 
 def run_permutation_test_bow_lowercase(train, test, kernel):
     train_Y = train['sentiment'].to_numpy()
     test_Y = test['sentiment'].to_numpy()
-    bow_train_X, vectorizer = get_bow_vectors(train['review'].values, min_count=5, max_frac=0.5)
+    bow_train_X, vectorizer = get_bow_vectors(train['review'].values, min_count=4, max_frac=0.5, frequency=False)
     bow_test_X, _ = get_bow_vectors(test['review'].values, vectorizer=vectorizer)
-    low_bow_train_X, low_vectorizer = get_bow_vectors(train['review'].values, min_count=5, max_frac=0.5, lowercase=False, frequency=False)
+    low_bow_train_X, low_vectorizer = get_bow_vectors(train['review'].values, min_count=4, max_frac=0.5, lowercase=False, frequency=False)
     low_bow_test_X, _ = get_bow_vectors(test['review'].values, vectorizer=low_vectorizer)
     svm1 = build_svm_classifier(bow_train_X, train_Y, kernel=kernel, gamma='scale')
     svm2 = build_svm_classifier(low_bow_train_X, train_Y, kernel=kernel, gamma='scale')
-    return permutation_test(test_Y, svm2.predict(bow_test_X), svm2.predict(low_bow_test_X))
+    return permutation_test(test_Y, svm1.predict(bow_test_X), svm2.predict(low_bow_test_X))
 
 def run_permutation_test_bow_vs_doc2vec(train, test, bow_kernel, doc2vec_kernel, bow_C, doc2vec_train_X, doc2vec_train_Y, doc2vec_model):
     """ Run a permutation test to compare bow and doc2vec svms. """
     # prepare data for both svms
     train_Y = train['sentiment'].to_numpy()
     test_Y = test['sentiment'].to_numpy()
-    bow_train_X, vectorizer = get_bow_vectors(train['review'].values, min_count=5, max_frac=0.5, frequency=False)
+    bow_train_X, vectorizer = get_bow_vectors(train['review'].values, min_count=4, max_frac=0.5, frequency=False)
     bow_test_X, _ = get_bow_vectors(test['review'].values, vectorizer=vectorizer)
     doc2vec_test_X = get_doc2vec_data(test['review'].values, doc2vec_model)
     # build models and predict
@@ -108,6 +130,23 @@ def run_permutation_test_bow_vs_doc2vec(train, test, bow_kernel, doc2vec_kernel,
     # delete big variables no longer used
     del bow_train_X;
     return permutation_test(test_Y, bow_svm.predict(bow_test_X), doc2vec_svm.predict(doc2vec_test_X))
+
+def run_permutation_test_uni_bi_bow_vs_doc2vec(train, test, bow_kernel, doc2vec_kernel, bow_C, doc2vec_train_X, doc2vec_train_Y, doc2vec_model):
+    """ Run a permutation test to compare bow and doc2vec svms. """
+    # prepare data for both svms
+    train_Y = train['sentiment'].to_numpy()
+    test_Y = test['sentiment'].to_numpy()
+    bi_train_X, bi_vectorizer = get_bow_vectors(train['review'].values, min_count=7, max_frac=0.5, frequency=False, bigrams=True)
+    bi_test_X, _ = get_bow_vectors(test['review'].values, vectorizer=bi_vectorizer)
+    uni_train_X, uni_vectorizer = get_bow_vectors(train['review'].values, min_count=4, max_frac=0.5, frequency=False, bigrams=True)
+    uni_test_X, _ = get_bow_vectors(test['review'].values, vectorizer=uni_vectorizer)
+    doc2vec_test_X = get_doc2vec_data(test['review'].values, doc2vec_model)
+    # build models and predict
+    bow_svm = build_svm_classifier(np.concatenate((uni_train_X, bi_train_X), axis=1), train_Y, kernel=kernel, gamma='scale')
+    doc2vec_svm = build_svm_classifier(doc2vec_train_X, doc2vec_train_Y, kernel=doc2vec_kernel, gamma='scale')
+    # delete big variables no longer used
+    del bow_train_X;
+    return permutation_test(test_Y, bow_svm.predict(np.concatenate((uni_test_X, bi_test_X), axis=1)), doc2vec_svm.predict(doc2vec_test_X))
 
 def run_permutation_test_two_different_doc2vecs(train, test, kernel1, kernel2, model1, model2, d2v_X_1, d2v_X_2, d2v_Y1, d2v_Y2):
     """ Run a permutation test to compare bow and doc2vec svms. """
@@ -176,44 +215,44 @@ def find_optimal_doc2vec_hyperparams(imdb_reviews, dev_data):
                     print('-----------------------------------------')
     print('Max accuracy was', maxim, 'with params', max_params)
 
-def get_cross_validated_baseline_accuracies(development_data, d2v_X_1, d2v_X_2, d2v_Y, d2v_model1, d2v_model2):
+def get_cross_validated_baseline_accuracies(development_data, doc2vec_Xs, doc2vec_Y, doc2vec_models):
     # bow baseline
-    X, _ = get_bow_vectors(development_data['review'].values, min_count=5, max_frac=0.5)
-    X_pres, _ = get_bow_vectors(development_data['review'].values, min_count=5, max_frac=0.5, frequency=False)
+    X, _ = get_bow_vectors(development_data['review'].values, min_count=4, max_frac=0.5)
+    X_pres, _ = get_bow_vectors(development_data['review'].values, min_count=4, max_frac=0.5, frequency=False)
+    X_low, _ = get_bow_vectors(development_data['review'].values, min_count=4, max_frac=0.5, lowercase=False, frequency=False)
+    X_bi, _ = get_bow_vectors(development_data['review'].values, min_count=7, max_frac=0.5, frequency=False, bigrams=True)
     Y = development_data['sentiment'].to_numpy()
-    acc3 = cross_validate_svm(X_pres, Y, kernel='linear', gamma='scale')
-    print('Cross validated bow accuracy when using a linear kernel and feature presence', acc3)
+    acc6 = cross_validate_svm(X_bi, Y, kernel='linear', gamma='scale')
+    print('Cross validated bow accuracy when using a linear kernel, feature presence and bigrams', acc6)
+    acc7 = cross_validate_svm(np.concatenate((X_bi, X_pres), axis=1), Y, kernel='linear', gamma='scale')
+    print('Cross validated bow accuracy when using a linear kernel, feature presence and both unigrams and bigrams', acc7)
+    acc5 = cross_validate_svm(X_low, Y, kernel='linear', gamma='scale')
+    print('Cross validated bow accuracy when using a linear kernel, feature presence and lowercased input', acc5)
     acc4 = cross_validate_svm(X_pres, Y, kernel='rbf', gamma='scale')
     print('Cross validated bow accuracy when using a gaussian kernel and feature presence', acc4)
+    acc3 = cross_validate_svm(X_pres, Y, kernel='linear', gamma='scale')
+    print('Cross validated bow accuracy when using a linear kernel and feature presence', acc3)
     acc1 = cross_validate_svm(X, Y, kernel='rbf', gamma='scale')
     print('Cross validated bow accuracy when using a gaussian kernel', acc1)
     acc2 = cross_validate_svm(X, Y, kernel='linear')
     print('Cross validated bow accuracy when using a linear kernel', acc2)
     # get doc2vec baseline accuracy
-    svm = build_svm_classifier(d2v_X_1, d2v_Y, kernel='rbf', gamma='scale')
-    test_X = get_doc2vec_data(development_data['review'].values, d2v_model1)
+    svm3 = build_svm_classifier(doc2vec_Xs[2], doc2vec_Y, kernel='rbf', gamma='scale')
+    test_X3 = get_doc2vec_data(development_data['review'].values, doc2vec_models[2])
     test_Y = development_data['sentiment'].values
-    accuracy3 = estimate_svm_accuracy(test_X, test_Y, svm)
-    print('Doc2Vec accuracy with a gaussian kernel', accuracy3)
-    test_X2 = get_doc2vec_data(development_data['review'].values, d2v_model2)
+    accuracy3 = estimate_svm_accuracy(test_X3, test_Y, svm3)
+    print('Doc2Vec accuracy with a gaussian kernel and dm mean vectors', accuracy3)
+    svm = build_svm_classifier(doc2vec_Xs[0], doc2vec_Y, kernel='rbf', gamma='scale')
+    test_X = get_doc2vec_data(development_data['review'].values, doc2vec_models[0])
+    accuracy = estimate_svm_accuracy(test_X, test_Y, svm)
+    print('Doc2Vec accuracy with a gaussian kernel', accuracy)
+    test_X2 = get_doc2vec_data(development_data['review'].values, doc2vec_models[1])
     test_concat_X = np.concatenate((test_X, test_X2), axis=1)
-    svm2 = build_svm_classifier(np.concatenate((d2v_X_1, d2v_X_2), axis=1), d2v_Y, kernel='rbf', gamma='scale')
+    svm2 = build_svm_classifier(np.concatenate((doc2vec_Xs[0], doc2vec_Xs[1]), axis=1), doc2vec_Y, kernel='rbf', gamma='scale')
     accuracy2 = estimate_svm_accuracy(test_concat_X, test_Y, svm2)
     print('Doc2Vec accuracy with concatenated vectors', accuracy2)
 
-
-def run_single_split_permutation_tests(training_data, val_data, doc2vec_train_X, doc2vec_train_Y, doc2vec_model):
-    perm_p = run_permutation_test_bow_vs_doc2vec(training_data, 
-                                                val_data, 
-                                                bow_kernel='linear', 
-                                                doc2vec_kernel='rbf', 
-                                                bow_C=4.7, 
-                                                doc2vec_train_X=doc2vec_train_X, 
-                                                doc2vec_train_Y=doc2vec_train_Y, 
-                                                doc2vec_model=doc2vec_model)
-    print('bow linear, doc2vec rbf permutation test p-value', perm_p)
-
-def cross_validate_permutation_tests(training_data, imdb_reviews, doc2vec_train_X, doc2vec_train_Y, doc2vec_model, dm_doc2vec_train_X, dm_doc2vec_train_Y, dm_doc2vec_model):
+def cross_validate_permutation_tests(training_data, imdb_reviews, doc2vec_Xs, doc2vec_Y, doc2vec_models):
     print('Comparing different bow hyperparameters')
     mean_p = cross_validate_permutation_test(training_data,
                                     3, 
@@ -221,11 +260,19 @@ def cross_validate_permutation_tests(training_data, imdb_reviews, doc2vec_train_
                                     kernel1='linear', 
                                     kernel2='rbf')
     print('mean p value with bow linear and rbf kernel', mean_p)
+    mean_p = cross_validate_permutation_test(training_data,
+                                    3, 
+                                    run_permutation_test_bow_with_uni_and_bigrams, 
+                                    kernel1='rbf', 
+                                    kernel2='rbf')
+    print('mean p value with bow using uni and bigrams and only unigrams', mean_p)
+    '''
     mean_p2 = cross_validate_permutation_test(training_data,
                                     3, 
                                     run_permutation_test_bow_lowercase, 
                                     kernel='rbf')
-    print('mean p value with bow linear and rbf kernel', mean_p2)
+    print('mean p value with rbf kernel and lowercase vs non-lowercased', mean_p2)
+    '''
     print('Comparing doc2vec to bow with different kernels')
     mean_p3 = cross_validate_permutation_test(training_data,
                                     3, 
@@ -233,34 +280,45 @@ def cross_validate_permutation_tests(training_data, imdb_reviews, doc2vec_train_
                                     bow_kernel='linear', 
                                     doc2vec_kernel='rbf', 
                                     bow_C=4.7, 
-                                    doc2vec_train_X=doc2vec_train_X, 
-                                    doc2vec_train_Y=doc2vec_train_Y, 
-                                    doc2vec_model=doc2vec_model)
-    print('mean p value with bow linear and doc2vec rbf kernel',  mean_p3)
-    # compare concatenation to just using dbow
+                                    doc2vec_train_X=doc2vec_Xs[0], 
+                                    doc2vec_train_Y=doc2vec_Y, 
+                                    doc2vec_model=doc2vec_models[0])
+    print('mean p value with bow linear with presence and doc2vec rbf kernel',  mean_p3)
     mean_p3 = cross_validate_permutation_test(training_data,
+                                    3, 
+                                    run_permutation_test_uni_bi_bow_vs_doc2vec, 
+                                    bow_kernel='linear', 
+                                    doc2vec_kernel='rbf', 
+                                    bow_C=4.7, 
+                                    doc2vec_train_X=doc2vec_Xs[0], 
+                                    doc2vec_train_Y=doc2vec_Y, 
+                                    doc2vec_model=doc2vec_models[0])
+    print('mean p value with bow linear with presence, uni and bigrams and doc2vec rbf kernel',  mean_p3)
+    # compare dm to dbow 
+    mean_p6 = cross_validate_permutation_test(training_data,
                                                 3, 
-                                                run_permutation_concatenated_vs_simple_doc2vec, 
+                                                run_permutation_test_two_different_doc2vecs, 
                                                 kernel1='rbf', 
                                                 kernel2='rbf',
-                                                model1=doc2vec_model, 
-                                                model2=dm_doc2vec_model, 
-                                                d2v_X_1=doc2vec_train_X, 
-                                                d2v_X_2=dm_doc2vec_train_X, 
-                                                d2v_Y=doc2vec_train_Y)
-    print('mean p value with dbow vs concatenated vectors', mean_p3)
-    # compare dm to dbow 
+                                                model1=doc2vec_model,
+                                                model2=mean,
+                                                d2v_X_1=doc2vec_Xs[0],
+                                                d2v_X_2=doc2vec_Xs[2],
+                                                d2v_Y1=doc2vec_Y,
+                                                d2v_Y2=doc2vec_Y)
+    print('mean p value with dm mean and dbow aand a gaussian kernel', mean_p6)
+    '''
     mean_p4 = cross_validate_permutation_test(training_data,
                                                 3, 
                                                 run_permutation_test_two_different_doc2vecs, 
                                                 kernel1='rbf', 
                                                 kernel2='rbf',
-                                                model1=doc2vec_model, 
-                                                model2=dm_doc2vec_model, 
-                                                d2v_X_1=doc2vec_train_X, 
-                                                d2v_X_2=dm_doc2vec_train_X, 
-                                                d2v_Y1=doc2vec_train_Y,
-                                                d2v_Y2=dm_doc2vec_train_Y)
+                                                model1=doc2vec_models[0], 
+                                                model2=doc2vec_models[1], 
+                                                d2v_X_1=doc2vec_Xs[0], 
+                                                d2v_X_2=doc2vec_Xs[1], 
+                                                d2v_Y1=doc2vec_Y,
+                                                d2v_Y2=doc2vec_Y)
     print('mean p value with dm and dbow vectors', mean_p4)
     # compare vector sizes
     print('Comparing vector sizes in doc2vec')
@@ -277,6 +335,19 @@ def cross_validate_permutation_tests(training_data, imdb_reviews, doc2vec_train_
                                                 d2v_Y1=doc2vec_train_Y,
                                                 d2v_Y2=bigvec_doc2vec_train_Y)
     print('mean p value with bow vector sizes 100 and 200', mean_p5)
+    # compare concatenation to just using dbow
+    mean_p3 = cross_validate_permutation_test(training_data,
+                                                3, 
+                                                run_permutation_concatenated_vs_simple_doc2vec, 
+                                                kernel1='rbf', 
+                                                kernel2='rbf',
+                                                model1=doc2vec_model, 
+                                                model2=dm_doc2vec_model, 
+                                                d2v_X_1=doc2vec_train_X, 
+                                                d2v_X_2=dm_doc2vec_train_X, 
+                                                d2v_Y=doc2vec_train_Y)
+    print('mean p value with dbow vs concatenated vectors', mean_p3)
+    '''
     print('-------')
 
 def get_blind_test_results(blind_test_set, doc2vec_model, doc2vec_svm, bow_svm, **bow_args):
@@ -289,7 +360,7 @@ def get_blind_test_results(blind_test_set, doc2vec_model, doc2vec_svm, bow_svm, 
     print('bow accuracy', bow_acc)
 
 def main():
-    np.random.seed(42)
+    np.random.seed(123)
     imdb_data_folder = 'aclImdb'
     imdb_sentiments = ['pos', 'neg']
     subfolders = ['train', 'test']
@@ -301,16 +372,18 @@ def main():
     imdb_reviews = get_reviews(imdb_data_folder, imdb_sentiments, subfolders)
     # train baseline doc2vec model
     doc2vec_train_X, doc2vec_train_Y, doc2vec_model = train_doc2vec_model(imdb_reviews, epochs=25, window_size=4, dm=0)
+    mean_doc2vec_train_X, mean_doc2vec_train_Y, mean_doc2vec_model = train_doc2vec_model(imdb_reviews, epochs=25, window_size=4, dm=1, dm_mean=1)
     dm_doc2vec_train_X, dm_doc2vec_train_Y, dm_doc2vec_model = train_doc2vec_model(imdb_reviews, epochs=25, window_size=4, dm=1)
     # split development data into training and validation sets
-    training_data, val_data = get_train_test_split(0.7, development_data)
-    print('Training data size', len(training_data), 'test data size', len(val_data))
     print('-----------')
-    #get_cross_validated_baseline_accuracies(development_data, d2v_X_1=doc2vec_train_X, d2v_X_2=dm_doc2vec_train_X, d2v_Y=doc2vec_train_Y, d2v_model1=doc2vec_model, d2v_model2=dm_doc2vec_model)
+    doc2vec_train_Xs = [doc2vec_train_X, dm_doc2vec_train_X, mean_doc2vec_train_X]
+    doc2vec_models = [doc2vec_model, dm_doc2vec_model, mean_doc2vec_model]
+    get_cross_validated_baseline_accuracies(development_data, 
+                                            doc2vec_Xs=doc2vec_train_Xs,
+                                            d2v_Y=doc2vec_train_Y,
+                                            doc2vec_models=doc2vec_models)
     print('-----------')
-    #run_single_split_permutation_tests(training_data, val_data, doc2vec_train_X, doc2vec_train_Y, doc2vec_model)
-    print('-----------')
-    cross_validate_permutation_tests(training_data, imdb_reviews, doc2vec_train_X, doc2vec_train_Y, doc2vec_model, dm_doc2vec_train_X, dm_doc2vec_train_Y, dm_doc2vec_model)
+    cross_validate_permutation_tests(development_data, imdb_reviews, doc2vec_train_X, doc2vec_train_Y, doc2vec_model, dm_doc2vec_train_X, dm_doc2vec_train_Y, dm_doc2vec_model)
     print('----------')
     # analyse doc2vec
     #doc2vec_svm = build_svm_classifier(doc2vec_train_X, doc2vec_train_Y, kernel='rbf', gamma='scale')

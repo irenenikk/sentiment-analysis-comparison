@@ -41,7 +41,7 @@ def get_reviews(imdb_data_folder, imdb_sentiments, subfolders):
     print('Found', len(reviews), ' IMDB reviews')
     return reviews
 
-def build_doc2vec_model(reviews, vec_size, window_size, min_count, epochs, dm, pretrained=True, save=True):
+def build_doc2vec_model(reviews, vec_size, window_size, min_count, epochs, dm, dm_mean, pretrained=True, save=True):
     fname = get_tmpfile('doc2vec_{}_{}_{}'.format(vec_size, window_size, min_count))
     # BUG: distinguishing between pretrained models
     if pretrained and os.path.exists(fname):
@@ -49,15 +49,15 @@ def build_doc2vec_model(reviews, vec_size, window_size, min_count, epochs, dm, p
         return Doc2Vec.load(fname)
     print('Training a Doc2Vec model for reviews')
     documents = [TaggedDocument(doc_tokenize(doc), [i]) for i, doc in enumerate(reviews)]
-    model = Doc2Vec(documents, vector_size=vec_size, window=2, min_count=min_count, workers=4, dm=dm, epochs=epochs)
+    model = Doc2Vec(documents, vector_size=vec_size, window=2, min_count=min_count, workers=4, dm=dm, epochs=epochs, dm_mean=dm_mean)
     if save:
         print('Saving to', fname)
         model.save(fname)
     return model
 
-def train_doc2vec_model(review_data, train_frac=0.7, vec_size=100, window_size=4, min_count=5, epochs=30, dm=1):
+def train_doc2vec_model(review_data, train_frac=0.7, vec_size=100, window_size=4, min_count=5, epochs=30, dm=1, dm_mean=0):
     """ Train a doc2vec model from given text data and return the trained model and training set vectors. """
-    model = build_doc2vec_model(review_data['review'].values, vec_size=vec_size, window_size=window_size, min_count=min_count, dm=dm, epochs=epochs, pretrained=False, save=False)
+    model = build_doc2vec_model(review_data['review'].values, vec_size=vec_size, window_size=window_size, min_count=min_count, dm=dm, epochs=epochs, dm_mean=dm_mean, pretrained=False, save=False)
     model.delete_temporary_training_data(keep_doctags_vectors=True, keep_inference=True)
     X = np.asarray([model.docvecs[i] for i in range(len(model.docvecs))])
     Y = review_data['sentiment'].to_numpy()
