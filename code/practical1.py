@@ -13,7 +13,7 @@ import sys
 from science_utils import sign_test_systems, sign_test_lists, sample_variance
 
 def build_data(test_data):
-    """ Build a test dataset from unigrams using the file ids. """
+    """ Build a test dataset from given unigrams. """
     labelled_test_data = test_data.groupby('file_id')['ngram'].apply(lambda gs: list(gs)).reset_index()
     labelled_test_data['review'] = labelled_test_data['ngram'].apply(lambda x: ' '.join(x))
     labelled_test_data = labelled_test_data.drop('ngram', axis=1)
@@ -21,7 +21,7 @@ def build_data(test_data):
     return labelled_test_data
 
 def estimate_naive_b_accuracy(test_data, training_data_files, naive_B, smooth):
-    """ Estimate the accuracy over test dataset using given unigrams and bigrams """
+    """ Estimate the accuracy over test dataset using given specific files as the test set. """
     acc = 0
     for file_id, group in test_data.groupby('file_id'):
         label = naive_B.predict(' '.join(group['ngram'].values))
@@ -59,21 +59,22 @@ def cross_validate_naive_b_bigrams_sign_test(data, classes, folds, unigrams, big
     systemB_accuracies = cross_validate_naiveB(data, classes, folds, smooth=False, lowercase=False, bigrams=bigrams, return_raw=True)
     return sign_test_lists(systemA_accuracies, systemB_accuracies)
 
-def cross_validate_naive_b_unigrams_bigrams_sign_test(data, classes, folds, unigrams, bigrams):
+def cross_validate_naive_b_unigrams_bigrams_vs_unigrams_sign_test(data, classes, folds, unigrams, bigrams):
     """ Test difference in two cross-validation accuracy sequences, one obtained using unigrams and the other using bigrams. """
     systemA_accuracies = cross_validate_naiveB(data, classes, folds, smooth=False, lowercase=False, unigrams=unigrams, return_raw=True)
     systemB_accuracies = cross_validate_naiveB(data, classes, folds, smooth=False, lowercase=False, unigrams=unigrams, bigrams=bigrams, return_raw=True)
+    return sign_test_lists(systemA_accuracies, systemB_accuracies)
+
+def cross_validate_naive_b_unigrams_bigrams_vs_bigrams_sign_test(data, classes, folds, unigrams, bigrams):
+    """ Test difference in two cross-validation accuracy sequences, one obtained using unigrams and the other using bigrams. """
+    systemA_accuracies = cross_validate_naiveB(data, classes, folds, smooth=False, lowercase=False, unigrams=unigrams, bigrams=bigrams, return_raw=True)
+    systemB_accuracies = cross_validate_naiveB(data, classes, folds, smooth=False, lowercase=False, unigrams=unigrams, bigrams=bigrams, return_raw=True)
+    return sign_test_lists(systemA_accuracies, systemB_accuracies)
 
 def cross_validate_naive_b_bigrams_sign_test_smoothed(data, classes, folds, unigrams, bigrams):
     """ Test difference in two cross-validation accuracy sequences, one obtained using unigrams and the other using bigrams. """
     systemA_accuracies = cross_validate_naiveB(data, classes, folds, smooth=True, lowercase=False, unigrams=unigrams, return_raw=True)
     systemB_accuracies = cross_validate_naiveB(data, classes, folds, smooth=True, lowercase=False, bigrams=bigrams, return_raw=True)
-    return sign_test_lists(systemA_accuracies, systemB_accuracies)
-
-def cross_validate_naive_b_lowercase_sign_test(data, classes, folds, unigrams):
-    """ Test difference in two cross-validation accuracy sequences, one obtained from a lowercased and the other from an unlowercased system. """
-    systemA_accuracies = cross_validate_naiveB(data, classes, folds, smooth=True, lowercase=True, unigrams=unigrams, return_raw=True)
-    systemB_accuracies = cross_validate_naiveB(data, classes, folds, smooth=True, lowercase=False, unigrams=unigrams, return_raw=True)
     return sign_test_lists(systemA_accuracies, systemB_accuracies)
 
 def run_baseline_test(naive_bs, single_split_train_files, test_data):
@@ -86,6 +87,7 @@ def run_baseline_test(naive_bs, single_split_train_files, test_data):
 
 def run_single_split_p_value_tests(single_split_train_files, classes, labelled_test_data, unigrams, bigrams, uni_naiveB, bi_naiveB, uni_bi_naiveB):
     """ Run different tests checking the significance of certain factors using a single train-test split. """
+    print('Single split tests:')
     print('The p-value of the effect of smoothing using the sign test with a single split')
     smoothed_uni_naiveB = NaiveB(classes, single_split_train_files, smooth=True, unigrams=unigrams)
     p_value1 = sign_test_systems(labelled_test_data, smoothed_uni_naiveB, uni_naiveB)
@@ -102,9 +104,7 @@ def run_single_split_p_value_tests(single_split_train_files, classes, labelled_t
     print('The p-value of lowercasing using unigrams', p_value4)
     # check the effect of using bigrams
     p_value5 = sign_test_systems(labelled_test_data, uni_naiveB, bi_naiveB)
-    print('The p-value of using bigrams compared to using unigrams', p_value5)
-    p_value6 = sign_test_systems(labelled_test_data, uni_bi_naiveB, bi_naiveB)
-    print('The p-value of using both unigrams and bigrams being better than using unigrams', p_value6)
+    print('The p-value of using bigrams compared to using unigrams when not smoothing', p_value5)
 
 def run_cross_validation(classes, unigrams, bigrams):
     """ Run cross-validaion using different model parameters. """
@@ -125,12 +125,10 @@ def run_cross_validated_accuracy_sign_tests(classes, unigrams, bigrams, folds=10
     print('The p-value of the effect of smoothing by cross-validated accuracies', p1)
     p2 = cross_validate_naive_b_bigrams_sign_test(unigrams, classes, folds, unigrams, bigrams)
     print('The p-value of the effect of using bigrams by cross-validated accuracies', p2)
-    p3 = cross_validate_naive_b_lowercase_sign_test(unigrams, classes, folds, unigrams)
-    print('The p-value of the effect of lowercasing by cross-validated accuracies', p3)
-    p5 = cross_validate_naive_b_bigrams_sign_test(unigrams, classes, folds, unigrams, bigrams)
-    print('The p-value of the effect of using both unigrams and bigrams by cross-validated accuracies', p5)
-    p4 = cross_validate_naive_b_bigrams_sign_test_smoothed(unigrams, classes, folds, unigrams, bigrams)
-    print('The p-value of the effect of using bigrams when smoothing by cross-validated accuracies', p4)
+    p4 = cross_validate_naive_b_unigrams_bigrams_vs_unigrams_sign_test(unigrams, classes, folds, unigrams, bigrams)
+    print('The p-value of the effect of using both unigrams and bigrams by cross-validated accuracies', p4)
+    p5 = cross_validate_naive_b_bigrams_sign_test_smoothed(unigrams, classes, folds, unigrams, bigrams)
+    print('The p-value of the effect of using bigrams when smoothing by cross-validated accuracies', p5)
 
 def get_features(data_folder):
     """ Load and filter unigrams and bigrams. """
@@ -164,9 +162,6 @@ def main():
                 uni_bi_naiveB] 
     test_data = unigrams[~unigrams['file_no'].isin(single_split_train_files)]
     labelled_test_data = build_data(test_data)
-
-    p4 = cross_validate_naive_b_bigrams_sign_test(unigrams, classes, 10, unigrams, bigrams)
-    print('The p-value of the effect of using both unigrams and bigrams by cross-validated accuracies', p4)
 
     print('-------------------')
     run_baseline_test(naive_bs, single_split_train_files, test_data)

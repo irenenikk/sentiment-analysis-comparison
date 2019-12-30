@@ -1,0 +1,2 @@
+-----------SVM comparisons-------
+No significant difference found between linear and rbf kernel on bow data

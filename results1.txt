@@ -1,0 +1,39 @@
+Got 55384 unigrams and 484086 bigrams
+Fraction of positive reviews 0.5 and negatives 0.5
+After filtering 19510 unigrams and 27830 bigrams
+-------------------
+Naive bayes baseline (no smoothing) using the files up to 899 in training and the rest as a test set.
+An unsmoothed Naive Bayes classifier using unigrams
+0.565
+----
+An unsmoothed Naive Bayes classifier using bigrams
+0.635
+----
+An unsmoothed Naive Bayes classifier using unigrams and bigrams
+0.53
+----
+-------------------
+The p-value of the effect of smoothing using the sign test with a single split
+The p-value of smoothing using only unigrams 0.00022673025705176423
+The p-value of smoothing using only bigrams 0.00028927526378706204
+The p-value of smoothing using both uni and bigrams 5.316851966364647e-06
+The p-value of lowercasing using unigrams 1.000000000000121
+The p-value of using bigrams compared to using unigrams 0.7237710263128192
+The p-value of using both unigrams and bigrams being better than using bigrams 0.3973782900879528
+---------------------
+Cross validation using round robin splits
+----------------
+When not smoothing
+Accuracy mean 0.5495 and variance 0.01257249999999999 when using only unigrams
+Accuracy mean 0.616 and variance 0.008790000000000015 when using only bigrams
+Accuracy mean 0.5394999999999999 and variance 0.016922500000000004 when using both unigrams and bigrams
+----------------
+When  smoothing
+Accuracy mean 0.8125 and variance 0.006712499999999985 when using only unigrams
+Accuracy mean 0.8260000000000002 and variance 0.00818999999999999 when using only bigrams
+Accuracy mean 0.8354999999999999 and variance 0.008122499999999993 when using both unigrams and bigrams
+--------------------
+The p-value of the effect of smoothing by cross-validated accuracies 0.001953125
+The p-value of the effect of using bigrams by cross-validated accuracies 0.02148437500000002
+The p-value of the effect of using bigrams when smoothing by cross-validated accuracies 0.109375
+

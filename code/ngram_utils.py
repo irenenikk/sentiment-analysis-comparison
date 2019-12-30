@@ -39,7 +39,7 @@ def get_uni_and_bi_grams(data_folder):
     bigrams = []
     bigram_sentiments = []
     bigram_file_ids = []
-    bigram_file_nos = []    
+    bigram_file_nos = []
     for sent in sentiments:
         review_folder = "{}/{}".format(data_folder, sent)
         for file in os.listdir(review_folder):
