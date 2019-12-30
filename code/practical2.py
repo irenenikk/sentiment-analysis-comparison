@@ -491,6 +491,13 @@ def deployment_test(imdb_data_folder, doc2vec_model, doc2vec_svm, uni_vectorizer
         print('doc2vec prediction', doc2vec_svm.predict(doc2vec_test_new[i].reshape(1, -1)))
         print('correct label', new_reviews['sentiment'].iloc[i])
         print('-------------')
+def get_bow_data(review_data, train_frac=0.7, min_count=10, max_frac=0.5, dim=100):
+    """ Get BOW vector training and test sets. """
+    X = get_bow_vectors(review_data['review'].values, min_count, max_frac)
+    Y = review_data['sentiment'].to_numpy()
+    print('Created a BOW vector of shape', X.shape)
+    return get_train_test_split(0.7, X, Y)
+    
 
 
 def main():
