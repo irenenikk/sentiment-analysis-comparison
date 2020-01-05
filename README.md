@@ -18,11 +18,16 @@ The data used is included in the repository. However, you should still give the 
 $ python3 code/practical1.py <path to data folder>
 ```
 
-## SVM
+## SVM extensions with different document representations
 
 The relevant code can be found in [the file practical2.py](code/practical2.py).
 
 Instructions [here](https://www.cl.cam.ac.uk/teaching/1920/L90/Instructions201920_part2.pdf).
 
-An expansion to the baseline system where an SVM is used in prediction. Compares systems using BOW-vectors and Doc2Vec.
+An expansion to the baseline system where an SVM is used in prediction. Compares systems using BOW-vectors and Doc2Vec. BOW vectors with both unigrams and bigrams as features, only measuring presence was found to perform the best. However, Doc2Vec does provide an improvement to the Naive Bayes baseline with a Gaussian kernel and when trained on the DBOW fake task.
 
+The data paths are assumed to be the same as in this repo.
+
+```
+$ python3 code/practical2.py
+```
